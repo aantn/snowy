@@ -65,13 +65,16 @@ class OpenIDBackend:
 
         if openid_response.status != SUCCESS:
             return None
-
+        
         user = None
         try:
             user_openid = UserOpenID.objects.get(
                 claimed_id__exact=openid_response.identity_url)
         except UserOpenID.DoesNotExist:
-            if kwargs.get('create_user') and kwargs.get('username'):
+            if kwargs.has_key('existing_user'):
+                user = kwargs.get('existing_user')
+                self.associate_openid(user, openid_response)
+            elif kwargs.get('create_user') and kwargs.get('username'):
                 user = self.create_user_from_openid(openid_response,
                                                     username=kwargs.get('username'))
             elif getattr(settings, 'OPENID_CREATE_USERS', False):
