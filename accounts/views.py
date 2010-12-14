@@ -17,6 +17,7 @@
 
 from django.utils.translation import ugettext_lazy as _
 
+from django.contrib.auth import get_backends
 from django.contrib.auth.forms import UserChangeForm, PasswordChangeForm
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login
@@ -33,6 +34,7 @@ from snowy.accounts.models import UserProfile
 from snowy.accounts.forms import InternationalizationForm, OpenIDRegistrationFormUniqueUser, EmailChangeForm, RemoveUserOpenIDForm
 
 from django_openid_auth import auth
+from django_openid_auth.auth import OpenIDBackend
 from django_openid_auth.models import UserOpenID
 import django_openid_auth.views
 
@@ -46,9 +48,9 @@ def openid_registration(request, template_name='registration/registration_form.h
 
     # If the user is already logged on, then link this new UserOpenID to their User 
     if request.user.is_authenticated():
-        user = authenticate(openid_response=openid_response,
-                            username=request.user.username,
-                            existing_user=request.user)
+        for backend in get_backends():
+            if type(backend) == OpenIDBackend:
+                backend.associate_openid(request.user, openid_response)
         
         # Clear the openid_response from the session so it can't be used to create another account
         del request.session['openid_response']
