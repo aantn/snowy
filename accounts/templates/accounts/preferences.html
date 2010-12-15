@@ -2,6 +2,17 @@
 
 {% load i18n %}
 
+{% block extra_head %}
+{{ block.super }}
+    <script type="text/javascript" src="{{ MEDIA_URL }}js/jquery.form.js" charset="utf-8"></script>
+    <script type="text/javascript">
+        // clear the password form
+        $(document).ready(function() {
+            $('#passwordForm').clearForm();
+        });
+    </script>
+{% endblock %}
+
 {% block content %}
 
 {% if messages %}
@@ -14,7 +25,7 @@
 <h1>{% trans "Preferences" %}</h1>
 {% if user.has_usable_password %}
 <h3>{% trans "Change your password" %}</h3>
-<form method="POST">
+<form id="passwordForm" method="POST">
     <table class="input-form">
     {{ password_form.as_table }}
         <tfoot>
